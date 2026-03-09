@@ -44,8 +44,8 @@
   .cam-header{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
   .cam-label{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);}
   .cam-badge{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:2px;color:var(--teal);}
-  .cam-body{position:relative;background:#000;flex:1;min-height:280px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-  #live-stream{width:100%;height:100%;object-fit:cover;display:block;}
+  .cam-body{position:relative;background:#000;flex:1;min-height:320px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  #live-stream{width:100%;height:320px;object-fit:cover;display:block;}
   .cam-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(6,14,26,0.7) 0%,transparent 40%);pointer-events:none;}
   .corner{position:absolute;width:20px;height:20px;border-color:var(--teal);border-style:solid;opacity:0.7;}
   .corner.tl{top:10px;left:10px;border-width:2px 0 0 2px;}.corner.tr{top:10px;right:10px;border-width:2px 2px 0 0;}
@@ -128,7 +128,16 @@
       <div class="cam-badge"><div class="live-dot"></div>Streaming</div>
     </div>
     <div class="cam-body">
-      <img id="live-stream" src="http://127.0.0.1:5050/stream" alt="Live Feed"/>
+      <img id="live-stream"
+         src="http://127.0.0.1:5050/stream"
+         alt="Live Feed"
+         style="width:100%;height:320px;object-fit:cover;display:block;"
+         onerror="setTimeout(()=>{this.src='http://127.0.0.1:5050/stream?t='+Date.now()},2000)"/>
+      <div id="cam-offline" style="display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;background:#000;">
+        <div style="font-size:32px;margin-bottom:10px;">📷</div>
+        <div style="font-size:11px;color:#4a6580;letter-spacing:2px;">WAITING FOR CAMERA FEED</div>
+        <div style="font-size:9px;color:#4a6580;margin-top:6px;">Run: py main_yolo.py</div>
+      </div>
       <div class="cam-overlay"></div>
       <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
       <div class="cam-pills">
@@ -448,6 +457,377 @@
 
   </div>
   <!-- END ADVANCED PANELS -->
+
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 🧪 WHAT-IF SIMULATOR                           -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div style="grid-column:span 4;background:rgba(0,10,20,0.95);border:1px solid rgba(245,166,35,0.25);border-radius:16px;overflow:hidden;">
+
+    <!-- Header -->
+    <div style="padding:14px 22px;border-bottom:1px solid rgba(245,166,35,0.12);background:rgba(245,166,35,0.04);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#fff;">🧪 What-If Species Simulator</div>
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#4a6580;margin-top:2px;">ANFIS-powered scenario simulation · Change parameters · See predictions instantly</div>
+      </div>
+      <div style="font-size:9px;letter-spacing:2px;color:#f5a623;">⚡ VIRTUAL ENVIRONMENT</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;">
+
+      <!-- LEFT: Controls -->
+      <div style="padding:24px;border-right:1px solid rgba(245,166,35,0.08);">
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#4a6580;margin-bottom:16px;">🎛 Simulation Parameters</div>
+
+        <!-- Species Selector -->
+        <div style="margin-bottom:20px;">
+          <div style="font-size:9px;color:#c8ddf0;margin-bottom:8px;letter-spacing:1px;">SELECT SPECIES</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <button onclick="selectSpecies('scad')" id="sp-scad"
+              style="padding:8px 4px;border-radius:8px;font-family:'Space Mono',monospace;font-size:9px;cursor:pointer;background:rgba(245,230,66,0.15);border:1px solid #f5e642;color:#f5e642;transition:all 0.2s;">
+              🐟 Yellowstripe Scad
+            </button>
+            <button onclick="selectSpecies('trevally')" id="sp-trevally"
+              style="padding:8px 4px;border-radius:8px;font-family:'Space Mono',monospace;font-size:9px;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid #4a6580;color:#4a6580;transition:all 0.2s;">
+              🦈 Giant Trevally
+            </button>
+          </div>
+          <div id="sp-info" style="margin-top:8px;padding:8px 10px;background:rgba(0,229,195,0.05);border:1px solid rgba(0,229,195,0.1);border-radius:6px;font-size:9px;color:#4a6580;line-height:1.6;">
+            Labeo rohita · Optimal: 26–28°C · pH 7.0–7.5 · Max: 45cm · Legal size: 25cm
+          </div>
+        </div>
+
+        <!-- Temperature Slider -->
+        <div style="margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="font-size:9px;color:#c8ddf0;letter-spacing:1px;">🌡 TEMPERATURE</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span id="sim-temp-val" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#00e5c3;">27</span>
+              <span style="font-size:9px;color:#4a6580;">°C</span>
+            </div>
+          </div>
+          <input type="range" id="sim-temp" min="15" max="38" value="27" step="0.5"
+            oninput="updateSimulator()"
+            style="width:100%;accent-color:#00e5c3;cursor:pointer;"/>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;">
+            <span style="font-size:7px;color:#4a6580;">15°C Cold</span>
+            <span style="font-size:7px;color:#00e5c3;">Optimal</span>
+            <span style="font-size:7px;color:#4a6580;">38°C Hot</span>
+          </div>
+          <div id="temp-zone" style="margin-top:6px;font-size:9px;padding:4px 8px;border-radius:4px;display:inline-block;background:rgba(0,229,195,0.1);color:#00e5c3;">✓ Optimal zone</div>
+        </div>
+
+        <!-- pH Slider -->
+        <div style="margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="font-size:9px;color:#c8ddf0;letter-spacing:1px;">🧪 pH LEVEL</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span id="sim-ph-val" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#f5a623;">7.2</span>
+              <span style="font-size:9px;color:#4a6580;">pH</span>
+            </div>
+          </div>
+          <input type="range" id="sim-ph" min="5.0" max="10.0" value="7.2" step="0.1"
+            oninput="updateSimulator()"
+            style="width:100%;accent-color:#f5a623;cursor:pointer;"/>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;">
+            <span style="font-size:7px;color:#4a6580;">5.0 Acid</span>
+            <span style="font-size:7px;color:#f5a623;">Neutral</span>
+            <span style="font-size:7px;color:#4a6580;">10.0 Alkaline</span>
+          </div>
+          <div id="ph-zone" style="margin-top:6px;font-size:9px;padding:4px 8px;border-radius:4px;display:inline-block;background:rgba(245,166,35,0.1);color:#f5a623;">✓ Neutral zone</div>
+        </div>
+
+        <button onclick="resetSimulator()"
+          style="width:100%;padding:10px;border-radius:8px;font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid #4a6580;color:#4a6580;letter-spacing:1px;">
+          ↺ Reset to Optimal
+        </button>
+      </div>
+
+      <!-- MIDDLE: Live Results -->
+      <div style="padding:24px;border-right:1px solid rgba(245,166,35,0.08);">
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#4a6580;margin-bottom:16px;">📊 Simulation Results</div>
+
+        <!-- Main predicted weight -->
+        <div style="background:linear-gradient(135deg,rgba(245,166,35,0.08),rgba(0,229,195,0.05));border:1px solid rgba(245,166,35,0.2);border-radius:12px;padding:20px;text-align:center;margin-bottom:14px;">
+          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#4a6580;margin-bottom:6px;">ANFIS Predicted Weight</div>
+          <div id="sim-weight" style="font-family:'Syne',sans-serif;font-size:48px;font-weight:800;color:#f5a623;line-height:1;">342</div>
+          <div style="font-size:12px;color:#4a6580;margin-top:4px;">grams</div>
+          <div style="margin-top:10px;height:3px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;">
+            <div id="sim-weight-bar" style="height:100%;width:68%;background:linear-gradient(90deg,#00e5c3,#f5a623);border-radius:2px;transition:width 0.6s;"></div>
+          </div>
+          <div style="font-size:8px;color:#4a6580;margin-top:4px;">vs max potential 500g</div>
+        </div>
+
+        <!-- Stats grid -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:8px;color:#4a6580;letter-spacing:1px;text-transform:uppercase;">Growth Rate</div>
+            <div id="sim-growth" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#00e5c3;margin-top:4px;">+4.2</div>
+            <div style="font-size:8px;color:#4a6580;">g/day</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:8px;color:#4a6580;letter-spacing:1px;text-transform:uppercase;">Condition</div>
+            <div id="sim-condition" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#00e5c3;margin-top:4px;">97%</div>
+            <div style="font-size:8px;color:#4a6580;">score</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:8px;color:#4a6580;letter-spacing:1px;text-transform:uppercase;">Disease Risk</div>
+            <div id="sim-disease" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#00e5c3;margin-top:4px;">8%</div>
+            <div style="font-size:8px;color:#4a6580;">probability</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:8px;color:#4a6580;letter-spacing:1px;text-transform:uppercase;">Harvest Day</div>
+            <div id="sim-harvest" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#f5a623;margin-top:4px;">Day 6</div>
+            <div style="font-size:8px;color:#4a6580;">to 400g</div>
+          </div>
+        </div>
+
+        <!-- Survival likelihood -->
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:12px;">
+          <div style="font-size:8px;color:#4a6580;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Survival Likelihood</div>
+          <div style="height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+            <div id="sim-survival-bar" style="height:100%;width:95%;background:linear-gradient(90deg,#00e5c3,#f5a623);border-radius:3px;transition:width 0.6s;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;">
+            <span style="font-size:8px;color:#4a6580;">0%</span>
+            <span id="sim-survival-val" style="font-size:9px;color:#00e5c3;font-weight:700;">95%</span>
+            <span style="font-size:8px;color:#4a6580;">100%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Comparison + Advice -->
+      <div style="padding:24px;">
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#4a6580;margin-bottom:16px;">🔬 Species Analysis</div>
+
+        <!-- Species card -->
+        <div id="species-card" style="background:rgba(0,229,195,0.05);border:1px solid rgba(0,229,195,0.15);border-radius:10px;padding:14px;margin-bottom:14px;">
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#fff;margin-bottom:4px;">🐟 Rohu</div>
+          <div style="font-size:9px;color:#00e5c3;margin-bottom:8px;font-style:italic;">Labeo rohita</div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <div style="display:flex;justify-content:space-between;font-size:9px;">
+              <span style="color:#4a6580;">Optimal Temp</span>
+              <span style="color:#fff;">26–28°C</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;">
+              <span style="color:#4a6580;">Optimal pH</span>
+              <span style="color:#fff;">7.0–7.5</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;">
+              <span style="color:#4a6580;">Max Length</span>
+              <span style="color:#fff;">45 cm</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;">
+              <span style="color:#4a6580;">Legal Min Size</span>
+              <span style="color:#fff;">25 cm</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;">
+              <span style="color:#4a6580;">Max Weight</span>
+              <span style="color:#fff;">~45 kg</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- What-if insight -->
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;margin-bottom:10px;">
+          <div style="font-size:8px;color:#4a6580;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">💡 Simulation Insight</div>
+          <div id="sim-insight" style="font-size:10px;color:#c8ddf0;line-height:1.8;">
+            Current conditions are optimal for Rohu growth. Temperature and pH are both within ideal range.
+          </div>
+        </div>
+
+        <!-- Warning -->
+        <div id="sim-warning" style="display:none;background:rgba(255,61,90,0.06);border:1px solid rgba(255,61,90,0.2);border-radius:10px;padding:12px;">
+          <div style="font-size:8px;color:#ff3d5a;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">⚠ Risk Warning</div>
+          <div id="sim-warning-text" style="font-size:10px;color:#c8ddf0;line-height:1.7;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <!-- END SIMULATOR -->
+
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 🧠 HIERARCHICAL ANFIS + XAI PANEL              -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div id="xai-panel" style="grid-column:span 4;background:rgba(0,10,20,0.95);border:1px solid rgba(147,51,234,0.3);border-radius:16px;overflow:hidden;">
+
+    <!-- Header -->
+    <div style="padding:14px 22px;border-bottom:1px solid rgba(147,51,234,0.15);background:rgba(147,51,234,0.05);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#fff;">🧠 Hierarchical ANFIS + Explainable AI</div>
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#4a6580;margin-top:2px;">3 Sub-Models → Master ANFIS → Final Score + Why</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:6px;height:6px;background:#9333ea;border-radius:50%;animation:blink 1s infinite;"></div>
+        <span style="font-size:9px;letter-spacing:2px;color:#9333ea;">XAI ACTIVE</span>
+      </div>
+    </div>
+
+    <!-- Architecture row -->
+    <div style="padding:16px 22px;border-bottom:1px solid rgba(147,51,234,0.08);background:rgba(0,0,0,0.2);">
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;">
+        <div style="text-align:center;padding:8px 14px;background:rgba(0,229,195,0.08);border:1px solid rgba(0,229,195,0.2);border-radius:8px;">
+          <div style="font-size:8px;color:#4a6580;letter-spacing:1px;">INPUTS</div>
+          <div style="font-size:9px;color:#00e5c3;margin-top:2px;">Temp + O₂</div>
+        </div>
+        <div style="color:#4a6580;font-size:14px;">→</div>
+        <div id="xai-env-box" style="text-align:center;padding:8px 14px;background:rgba(0,229,195,0.08);border:1px solid rgba(0,229,195,0.2);border-radius:8px;min-width:90px;">
+          <div style="font-size:8px;color:#4a6580;letter-spacing:1px;">ANFIS-ENV</div>
+          <div id="xai-env-score" style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#00e5c3;margin-top:2px;">--</div>
+        </div>
+        <div style="color:#4a6580;font-size:10px;">╮</div>
+
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:center;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="text-align:center;padding:8px 14px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:8px;">
+              <div style="font-size:8px;color:#4a6580;letter-spacing:1px;">INPUTS</div>
+              <div style="font-size:9px;color:#f5a623;margin-top:2px;">pH + NH₃</div>
+            </div>
+            <div style="color:#4a6580;font-size:14px;">→</div>
+            <div id="xai-chem-box" style="text-align:center;padding:8px 14px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:8px;min-width:90px;">
+              <div style="font-size:8px;color:#4a6580;letter-spacing:1px;">ANFIS-CHEM</div>
+              <div id="xai-chem-score" style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#f5a623;margin-top:2px;">--</div>
+            </div>
+          </div>
+          <div style="color:#4a6580;font-size:10px;">↓ sub-scores ↓</div>
+        </div>
+
+        <div style="color:#4a6580;font-size:10px;">╯</div>
+        <div style="color:#4a6580;font-size:14px;">→</div>
+        <div id="xai-master-box" style="text-align:center;padding:12px 20px;background:rgba(147,51,234,0.1);border:2px solid rgba(147,51,234,0.4);border-radius:10px;min-width:100px;">
+          <div style="font-size:8px;color:#9333ea;letter-spacing:1px;">MASTER ANFIS</div>
+          <div id="xai-final-score" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#9333ea;margin-top:2px;">--</div>
+          <div id="xai-grade" style="font-size:11px;color:#9333ea;margin-top:2px;">Grade --</div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="color:#4a6580;font-size:10px;">╮</div>
+          <div style="text-align:center;padding:8px 14px;background:rgba(255,61,90,0.08);border:1px solid rgba(255,61,90,0.2);border-radius:8px;">
+            <div style="font-size:8px;color:#4a6580;letter-spacing:1px;">INPUTS</div>
+            <div style="font-size:9px;color:#ff3d5a;margin-top:2px;">Fish + Juv%</div>
+          </div>
+          <div style="color:#4a6580;font-size:14px;">→</div>
+          <div id="xai-pop-box" style="text-align:center;padding:8px 14px;background:rgba(255,61,90,0.08);border:1px solid rgba(255,61,90,0.2);border-radius:8px;min-width:90px;">
+            <div style="font-size:8px;color:#4a6580;letter-spacing:1px;">ANFIS-POP</div>
+            <div id="xai-pop-score" style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#ff3d5a;margin-top:2px;">--</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content: 3 columns -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;">
+
+      <!-- LEFT: Sub-model scores -->
+      <div style="padding:20px;border-right:1px solid rgba(147,51,234,0.08);">
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#4a6580;margin-bottom:14px;">📊 Sub-Model Scores</div>
+
+        <!-- Env -->
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+            <span style="font-size:10px;color:#00e5c3;">🌡 Environment</span>
+            <span id="xai-env-pct" style="font-size:10px;color:#00e5c3;font-weight:700;">--%</span>
+          </div>
+          <div style="height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+            <div id="xai-env-bar" style="height:100%;width:0%;background:#00e5c3;border-radius:3px;transition:width 0.8s;"></div>
+          </div>
+          <div id="xai-env-rule" style="font-size:8px;color:#4a6580;margin-top:4px;font-style:italic;">--</div>
+        </div>
+
+        <!-- Chem -->
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+            <span style="font-size:10px;color:#f5a623;">🧪 Chemistry</span>
+            <span id="xai-chem-pct" style="font-size:10px;color:#f5a623;font-weight:700;">--%</span>
+          </div>
+          <div style="height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+            <div id="xai-chem-bar" style="height:100%;width:0%;background:#f5a623;border-radius:3px;transition:width 0.8s;"></div>
+          </div>
+          <div id="xai-chem-rule" style="font-size:8px;color:#4a6580;margin-top:4px;font-style:italic;">--</div>
+        </div>
+
+        <!-- Pop -->
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+            <span style="font-size:10px;color:#ff3d5a;">🐟 Population</span>
+            <span id="xai-pop-pct" style="font-size:10px;color:#ff3d5a;font-weight:700;">--%</span>
+          </div>
+          <div style="height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+            <div id="xai-pop-bar" style="height:100%;width:0%;background:#ff3d5a;border-radius:3px;transition:width 0.8s;"></div>
+          </div>
+          <div id="xai-pop-rule" style="font-size:8px;color:#4a6580;margin-top:4px;font-style:italic;">--</div>
+        </div>
+
+        <!-- Dominant factor -->
+        <div style="background:rgba(147,51,234,0.08);border:1px solid rgba(147,51,234,0.2);border-radius:8px;padding:10px;">
+          <div style="font-size:8px;color:#4a6580;letter-spacing:1px;margin-bottom:4px;">DOMINANT RISK FACTOR</div>
+          <div id="xai-dominant" style="font-size:12px;color:#9333ea;font-weight:700;">--</div>
+        </div>
+      </div>
+
+      <!-- MIDDLE: Rule explanations -->
+      <div style="padding:20px;border-right:1px solid rgba(147,51,234,0.08);">
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#4a6580;margin-bottom:14px;">🔍 Why This Score? — Fired Rules</div>
+
+        <div id="xai-rules-container" style="display:flex;flex-direction:column;gap:8px;">
+          <div style="font-size:9px;color:#4a6580;">Waiting for data...</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Recommendation -->
+      <div style="padding:20px;">
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#4a6580;margin-bottom:14px;">💡 XAI Recommendation</div>
+
+        <!-- Reasons list -->
+        <div id="xai-reasons" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
+          <div style="font-size:9px;color:#4a6580;">Waiting for analysis...</div>
+        </div>
+
+        <!-- Action -->
+        <div style="background:rgba(147,51,234,0.08);border:1px solid rgba(147,51,234,0.2);border-radius:8px;padding:12px;margin-bottom:10px;">
+          <div style="font-size:8px;color:#9333ea;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">⚡ Recommended Action</div>
+          <div id="xai-action" style="font-size:10px;color:#c8ddf0;line-height:1.7;">--</div>
+        </div>
+
+        <!-- Contribution bars -->
+        <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:12px;">
+          <div style="font-size:8px;color:#4a6580;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Score Contribution</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
+                <span style="font-size:8px;color:#00e5c3;">Environment (40%)</span>
+                <span id="xai-env-contrib" style="font-size:8px;color:#00e5c3;">--</span>
+              </div>
+              <div style="height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;">
+                <div id="xai-env-contrib-bar" style="height:100%;width:0%;background:#00e5c3;border-radius:2px;transition:width 0.8s;"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
+                <span style="font-size:8px;color:#f5a623;">Chemistry (35%)</span>
+                <span id="xai-chem-contrib" style="font-size:8px;color:#f5a623;">--</span>
+              </div>
+              <div style="height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;">
+                <div id="xai-chem-contrib-bar" style="height:100%;width:0%;background:#f5a623;border-radius:2px;transition:width 0.8s;"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
+                <span style="font-size:8px;color:#ff3d5a;">Population (25%)</span>
+                <span id="xai-pop-contrib" style="font-size:8px;color:#ff3d5a;">--</span>
+              </div>
+              <div style="height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;">
+                <div id="xai-pop-contrib-bar" style="height:100%;width:0%;background:#ff3d5a;border-radius:2px;transition:width 0.8s;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END XAI PANEL -->
 
   <!-- BOTTOM BAR -->
   <div class="bottom-bar">
@@ -807,6 +1187,298 @@ fetchSensor = async function() {
   } catch(e) {}
 };
 
+
+// ══════════════════════════════════════════════
+// WHAT-IF SIMULATOR
+// ══════════════════════════════════════════════
+
+const SPECIES = {
+  scad: {
+    name: "Yellowstripe Scad", sci: "Selaroides leptolepis", emoji: "🐟",
+    optTemp: [24, 30], optPH: [7.5, 8.5],
+    maxLen: 18, legalMin: 10, maxWeight: 150,
+    L_inf: 18, K: 0.55, t0: -0.2, a: 0.014, b: 3.02,
+    color: "#f5e642",
+    info: "Selaroides leptolepis · Optimal: 24–30°C · pH 7.5–8.5 · Max: 18cm · Legal size: 10cm",
+    diseases: {
+      cold:     { name: "Fungal Saprolegnia",   trigger: "temp < 22" },
+      bacteria: { name: "Vibrio Infection",      trigger: "temp < 23 and dense school" },
+      alkaline: { name: "Osmotic Stress",        trigger: "ph > 8.8" },
+      hot:      { name: "Bacterial Septicemia",  trigger: "temp > 32" },
+    }
+  },
+  trevally: {
+    name: "Giant Trevally", sci: "Caranx ignobilis", emoji: "🦈",
+    optTemp: [26, 32], optPH: [7.8, 8.5],
+    maxLen: 80, legalMin: 35, maxWeight: 80000,
+    L_inf: 80, K: 0.18, t0: -0.8, a: 0.011, b: 3.1,
+    color: "#7eb8f7",
+    info: "Caranx ignobilis · Optimal: 26–32°C · pH 7.8–8.5 · Max: 80cm · Legal size: 35cm",
+    diseases: {
+      cold:     { name: "Lymphocystis Disease",  trigger: "temp < 22" },
+      bacteria: { name: "Streptococcus sp.",     trigger: "temp < 23" },
+      alkaline: { name: "Alkalinity Stress",     trigger: "ph > 9.0" },
+      hot:      { name: "Aeromonas Infection",   trigger: "temp > 34" },
+    }
+  }
+};
+
+let currentSpecies = "rohu";
+
+function selectSpecies(sp) {
+  currentSpecies = sp;
+  const s = SPECIES[sp];
+
+  // Update buttons
+  Object.keys(SPECIES).forEach(k => {
+    const btn = document.getElementById("sp-" + k);
+    if (!btn) return;
+    const active = k === sp;
+    btn.style.background = active ? s.color + "22" : "rgba(255,255,255,0.04)";
+    btn.style.borderColor = active ? s.color : "#4a6580";
+    btn.style.color = active ? s.color : "#4a6580";
+  });
+
+  // Update info
+  document.getElementById("sp-info").textContent = s.info;
+
+  // Update species card
+  document.getElementById("species-card").style.borderColor = s.color + "44";
+  document.getElementById("species-card").style.background = s.color + "11";
+  document.getElementById("species-card").innerHTML = `
+    <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#fff;margin-bottom:4px;">${s.emoji} ${s.name}</div>
+    <div style="font-size:9px;color:${s.color};margin-bottom:8px;font-style:italic;">${s.sci}</div>
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      <div style="display:flex;justify-content:space-between;font-size:9px;"><span style="color:#4a6580;">Optimal Temp</span><span style="color:#fff;">${s.optTemp[0]}–${s.optTemp[1]}°C</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;"><span style="color:#4a6580;">Optimal pH</span><span style="color:#fff;">${s.optPH[0]}–${s.optPH[1]}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;"><span style="color:#4a6580;">Max Length</span><span style="color:#fff;">${s.maxLen} cm</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;"><span style="color:#4a6580;">Legal Min Size</span><span style="color:#fff;">${s.legalMin} cm</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;"><span style="color:#4a6580;">Max Weight</span><span style="color:#fff;">~${(s.maxWeight/1000).toFixed(0)} kg</span></div>
+    </div>
+  `;
+
+  updateSimulator();
+}
+
+// Inline ANFIS approximation (runs in browser, no server needed)
+function anfisPredict(temp, ph, species) {
+  const s = SPECIES[species];
+  const optT = (s.optTemp[0] + s.optTemp[1]) / 2;
+  const optP = (s.optPH[0] + s.optPH[1]) / 2;
+  const sigT = (s.optTemp[1] - s.optTemp[0]) / 2 + 1.5;
+  const sigP = (s.optPH[1] - s.optPH[0]) / 2 + 0.3;
+  const tempScore = Math.exp(-0.5 * ((temp - optT) / sigT) ** 2);
+  const phScore   = Math.exp(-0.5 * ((ph   - optP) / sigP) ** 2);
+  const condition = tempScore * phScore;
+  const maxW = s.maxWeight * 0.001; // convert to grams reasonable
+  const weight = Math.max(10, Math.min(500, 400 * condition + 30));
+  return { weight: Math.round(weight), condition: Math.round(condition * 100) };
+}
+
+function updateSimulator() {
+  const temp = parseFloat(document.getElementById("sim-temp").value);
+  const ph   = parseFloat(document.getElementById("sim-ph").value);
+  const s    = SPECIES[currentSpecies];
+
+  // Update display values
+  document.getElementById("sim-temp-val").textContent = temp.toFixed(1);
+  document.getElementById("sim-ph-val").textContent   = ph.toFixed(1);
+
+  // Temperature zone
+  const tempZone = document.getElementById("temp-zone");
+  const tempC    = temp >= s.optTemp[0] && temp <= s.optTemp[1];
+  const tempWarn = temp < s.optTemp[0] - 4 || temp > s.optTemp[1] + 4;
+  tempZone.textContent    = tempC ? "✓ Optimal zone" : tempWarn ? "✗ Danger zone" : "⚠ Sub-optimal";
+  tempZone.style.color    = tempC ? "#00e5c3" : tempWarn ? "#ff3d5a" : "#ffb020";
+  tempZone.style.background = tempC ? "rgba(0,229,195,0.1)" : tempWarn ? "rgba(255,61,90,0.1)" : "rgba(255,176,32,0.1)";
+
+  // pH zone
+  const phZone = document.getElementById("ph-zone");
+  const phC    = ph >= s.optPH[0] && ph <= s.optPH[1];
+  const phWarn = ph < s.optPH[0] - 1 || ph > s.optPH[1] + 1;
+  phZone.textContent    = phC ? "✓ Neutral zone" : phWarn ? "✗ Danger zone" : "⚠ Sub-optimal";
+  phZone.style.color    = phC ? "#f5a623" : phWarn ? "#ff3d5a" : "#ffb020";
+  phZone.style.background = phC ? "rgba(245,166,35,0.1)" : phWarn ? "rgba(255,61,90,0.1)" : "rgba(255,176,32,0.1)";
+
+  // ANFIS prediction
+  const { weight, condition } = anfisPredict(temp, ph, currentSpecies);
+
+  // Growth rate (condition-based)
+  const growthRate = (condition / 100 * 5 + 0.3).toFixed(1);
+
+  // Disease risk
+  let diseaseRisk = 0;
+  if (temp > 30) diseaseRisk += 35;
+  if (temp < 18) diseaseRisk += 30;
+  if (ph < 6.5)  diseaseRisk += 35;
+  if (ph > 8.5)  diseaseRisk += 25;
+  diseaseRisk = Math.min(95, diseaseRisk);
+
+  // Days to harvest (400g target)
+  const daysToHarvest = weight >= 400 ? 0 : Math.ceil((400 - weight) / parseFloat(growthRate));
+  const harvestText   = weight >= 400 ? "Ready!" : daysToHarvest > 30 ? ">30 days" : `Day ${daysToHarvest}`;
+
+  // Survival
+  const survival = Math.max(10, Math.min(99, condition - diseaseRisk * 0.3));
+
+  // Update UI
+  document.getElementById("sim-weight").textContent       = weight;
+  document.getElementById("sim-weight-bar").style.width   = (weight / 500 * 100) + "%";
+  document.getElementById("sim-growth").textContent       = "+" + growthRate;
+  document.getElementById("sim-condition").textContent    = condition + "%";
+  document.getElementById("sim-disease").textContent      = diseaseRisk + "%";
+  document.getElementById("sim-harvest").textContent      = harvestText;
+  document.getElementById("sim-survival-bar").style.width = survival + "%";
+  document.getElementById("sim-survival-val").textContent = Math.round(survival) + "%";
+
+  const cc = condition >= 75 ? "#00e5c3" : condition >= 50 ? "#ffb020" : "#ff3d5a";
+  document.getElementById("sim-condition").style.color    = cc;
+  document.getElementById("sim-growth").style.color       = cc;
+  document.getElementById("sim-disease").style.color      = diseaseRisk > 50 ? "#ff3d5a" : diseaseRisk > 25 ? "#ffb020" : "#00e5c3";
+
+  // Insight
+  let insight = "";
+  if (condition >= 80) {
+    insight = `✅ Excellent conditions for ${s.name}. Temperature ${temp.toFixed(1)}°C and pH ${ph.toFixed(1)} are both within optimal range. Maximum growth rate achievable.`;
+  } else if (condition >= 50) {
+    insight = `⚠️ Sub-optimal conditions for ${s.name}. `;
+    if (!tempC) insight += `Adjust temperature toward ${s.optTemp[0]}–${s.optTemp[1]}°C. `;
+    if (!phC)   insight += `Adjust pH toward ${s.optPH[0]}–${s.optPH[1]}. `;
+    insight += `Growth rate is reduced.`;
+  } else {
+    insight = `🔴 Poor conditions for ${s.name}. Current environment significantly inhibits growth and increases disease risk. Immediate intervention required.`;
+  }
+  document.getElementById("sim-insight").textContent = insight;
+
+  // Warning
+  const warnings = [];
+  if (temp > 32)  warnings.push("🌡 Temperature critically high — Aeromonas bacterial infection risk");
+  if (temp < 18)  warnings.push("❄️ Temperature critically low — Fungal outbreak (Saprolegnia) risk");
+  if (ph < 6.0)   warnings.push("🧪 pH dangerously acidic — Bacterial gill disease risk");
+  if (ph > 9.0)   warnings.push("🧪 pH dangerously alkaline — Osmotic stress and tissue damage");
+  if (temp > 28 && ph > 7.5) warnings.push("⚡ Ich (White Spot Disease) conditions detected");
+
+  // Species-specific disease outbreak prediction
+  const diseases = s.diseases || {};
+  const outbreaks = [];
+  if (temp < 22 && diseases.cold)     outbreaks.push("🔴 HIGH RISK: " + diseases.cold.name);
+  else if (temp < 23 && diseases.cold) outbreaks.push("🟡 MODERATE: " + diseases.cold.name);
+  if (temp > 34 && diseases.hot)       outbreaks.push("🔴 HIGH RISK: " + diseases.hot.name);
+  if (ph > 8.8 && diseases.alkaline)   outbreaks.push("🟡 RISK: " + diseases.alkaline.name);
+  if (ph > 9.0 && diseases.alkaline)   outbreaks.push("🔴 HIGH RISK: " + diseases.alkaline.name);
+
+  const warnEl = document.getElementById("sim-warning");
+  const allAlerts = [...warnings, ...outbreaks];
+  if (allAlerts.length > 0) {
+    warnEl.style.display = "block";
+    document.getElementById("sim-warning-text").innerHTML = allAlerts.join("<br>");
+  } else {
+    warnEl.style.display = "none";
+  }
+}
+
+function resetSimulator() {
+  const s = SPECIES[currentSpecies];
+  const optT = (s.optTemp[0] + s.optTemp[1]) / 2;
+  const optP = (s.optPH[0] + s.optPH[1]) / 2;
+  document.getElementById("sim-temp").value = optT;
+  document.getElementById("sim-ph").value   = optP;
+  updateSimulator();
+}
+
+// Init
+selectSpecies("scad");
+
+
+// ══════════════════════════════════════════════
+// XAI PANEL UPDATER
+// ══════════════════════════════════════════════
+async function updateXAI() {
+  try {
+    const res = await fetch("http://127.0.0.1:5050/sensor_data");
+    const d   = await res.json();
+    if (!d.xai) return;
+    const x = d.xai;
+
+    const scoreColor = x.final_score >= 75 ? "#00e5c3"
+                     : x.final_score >= 50 ? "#f5a623" : "#ff3d5a";
+
+    // Architecture boxes
+    document.getElementById("xai-env-score").textContent  = x.env_score + "%";
+    document.getElementById("xai-chem-score").textContent = x.chem_score + "%";
+    document.getElementById("xai-pop-score").textContent  = x.pop_score + "%";
+    document.getElementById("xai-final-score").textContent = x.final_score + "%";
+    document.getElementById("xai-final-score").style.color = scoreColor;
+    document.getElementById("xai-grade").textContent = "Grade " + x.grade;
+    document.getElementById("xai-grade").style.color = scoreColor;
+
+    // Sub-model bars
+    const setBar = (id, val, color) => {
+      document.getElementById(id + "-pct").textContent = val + "%";
+      document.getElementById(id + "-bar").style.width = val + "%";
+    };
+    setBar("xai-env",  x.env_score,  "#00e5c3");
+    setBar("xai-chem", x.chem_score, "#f5a623");
+    setBar("xai-pop",  x.pop_score,  "#ff3d5a");
+
+    // Top fired rules per sub-model
+    const setRule = (id, rules) => {
+      if (rules && rules[0])
+        document.getElementById(id + "-rule").textContent =
+          `IF ${rules[0].rule} → ${rules[0].firing}% fired`;
+    };
+    setRule("xai-env",  x.env_rules);
+    setRule("xai-chem", x.chem_rules);
+    setRule("xai-pop",  x.pop_rules);
+
+    // Dominant factor
+    document.getElementById("xai-dominant").textContent = x.dominant_factor + " is the primary limiting factor";
+
+    // Rules explanation
+    const rulesEl = document.getElementById("xai-rules-container");
+    const allRules = [
+      ...(x.env_rules  || []).slice(0,1).map(r => ({...r, src:"ENV",  color:"#00e5c3"})),
+      ...(x.chem_rules || []).slice(0,1).map(r => ({...r, src:"CHEM", color:"#f5a623"})),
+      ...(x.pop_rules  || []).slice(0,1).map(r => ({...r, src:"POP",  color:"#ff3d5a"})),
+      ...(x.master_rules|| []).slice(0,1).map(r => ({...r, src:"MASTER",color:"#9333ea"})),
+    ];
+    rulesEl.innerHTML = allRules.map(r => `
+      <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-left:3px solid ${r.color};border-radius:6px;padding:8px 10px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+          <span style="font-size:8px;color:${r.color};letter-spacing:1px;">${r.src}</span>
+          <span style="font-size:8px;color:#4a6580;">${r.firing}% fired</span>
+        </div>
+        <div style="font-size:9px;color:#c8ddf0;">IF ${r.rule}</div>
+        <div style="font-size:8px;color:${r.impact==='positive'?'#00e5c3':'#ff3d5a'};margin-top:2px;">
+          ${r.impact === 'positive' ? '▲' : '▼'} ${r.impact} impact
+        </div>
+      </div>
+    `).join('');
+
+    // Reasons
+    const reasonsEl = document.getElementById("xai-reasons");
+    reasonsEl.innerHTML = (x.reasons || []).map(r => `
+      <div style="font-size:9px;color:#c8ddf0;padding:6px 10px;background:rgba(255,255,255,0.02);border-radius:6px;border-left:2px solid ${scoreColor};">
+        ${r}
+      </div>
+    `).join('');
+
+    // Action
+    document.getElementById("xai-action").textContent = x.recommendation;
+
+    // Contributions
+    document.getElementById("xai-env-contrib").textContent  = x.env_contrib + "pts";
+    document.getElementById("xai-chem-contrib").textContent = x.chem_contrib + "pts";
+    document.getElementById("xai-pop-contrib").textContent  = x.pop_contrib + "pts";
+    document.getElementById("xai-env-contrib-bar").style.width  = x.env_contrib + "%";
+    document.getElementById("xai-chem-contrib-bar").style.width = x.chem_contrib + "%";
+    document.getElementById("xai-pop-contrib-bar").style.width  = x.pop_contrib + "%";
+
+  } catch(e) {}
+}
+setInterval(updateXAI, 1500);
+updateXAI();
+
 setInterval(fetchData,500);
 setInterval(fetchSensor,1000);
 fetchData();
@@ -814,3 +1486,370 @@ fetchSensor();
 </script>
 </body>
 </html>
+
+<!-- THIS SCRIPT IS APPENDED — 3D POND HEATMAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  #pond-3d-section {
+    grid-column: span 4;
+    background: rgba(0,10,20,0.95);
+    border: 1px solid rgba(0,229,195,0.25);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  #pond-3d-header {
+    padding: 14px 22px;
+    border-bottom: 1px solid rgba(0,229,195,0.12);
+    background: rgba(0,229,195,0.04);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  #pond-canvas-wrap {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 0;
+  }
+  #pond-canvas { width: 100%; height: 380px; display: block; cursor: grab; }
+  #pond-canvas:active { cursor: grabbing; }
+  #pond-controls {
+    padding: 18px;
+    border-left: 1px solid rgba(0,229,195,0.08);
+    display: flex; flex-direction: column; gap: 12px;
+  }
+</style>
+
+<script>
+// ── INSERT 3D POND SECTION INTO MAIN GRID ──
+(function() {
+  const main = document.querySelector('main');
+  const section = document.createElement('div');
+  section.id = 'pond-3d-section';
+  section.innerHTML = `
+    <div id="pond-3d-header">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#fff;">🌊 3D Pond Digital Twin — Live Heatmap</div>
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#4a6580;margin-top:2px;">Oxygen Distribution · Waste Concentration · Temperature Gradient · Real-time Three.js Visualization</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button id="layer-o2"   onclick="setLayer('oxygen')"  style="padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;background:rgba(0,229,195,0.15);border:1px solid #00e5c3;color:#00e5c3;">O₂ Layer</button>
+        <button id="layer-waste" onclick="setLayer('waste')"  style="padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid #4a6580;color:#4a6580;">Waste</button>
+        <button id="layer-temp"  onclick="setLayer('temp')"   style="padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid #4a6580;color:#4a6580;">Temp</button>
+        <div style="display:flex;align-items:center;gap:6px;font-size:9px;color:#00e5c3;letter-spacing:2px;">
+          <div style="width:6px;height:6px;background:#00e5c3;border-radius:50%;animation:blink 1s infinite;"></div>LIVE
+        </div>
+      </div>
+    </div>
+    <div id="pond-canvas-wrap">
+      <canvas id="pond-canvas"></canvas>
+      <div id="pond-controls">
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#4a6580;margin-bottom:4px;">Pond Parameters</div>
+
+        <div style="background:rgba(0,229,195,0.05);border:1px solid rgba(0,229,195,0.1);border-radius:8px;padding:12px;">
+          <div style="font-size:8px;color:#4a6580;letter-spacing:1px;text-transform:uppercase;">Dissolved O₂</div>
+          <div id="p-o2" style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#00e5c3;">--</div>
+          <div style="font-size:8px;color:#4a6580;">mg/L  (optimal: 6–9)</div>
+          <div style="height:3px;background:rgba(255,255,255,0.05);border-radius:2px;margin-top:6px;overflow:hidden;">
+            <div id="p-o2-bar" style="height:100%;width:0%;background:#00e5c3;transition:width 0.8s;border-radius:2px;"></div>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,61,90,0.05);border:1px solid rgba(255,61,90,0.1);border-radius:8px;padding:12px;">
+          <div style="font-size:8px;color:#4a6580;letter-spacing:1px;text-transform:uppercase;">Waste / NH₃</div>
+          <div id="p-waste" style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#ff3d5a;">--</div>
+          <div style="font-size:8px;color:#4a6580;">ppm  (safe: &lt;0.5)</div>
+          <div style="height:3px;background:rgba(255,255,255,0.05);border-radius:2px;margin-top:6px;overflow:hidden;">
+            <div id="p-waste-bar" style="height:100%;width:0%;background:#ff3d5a;transition:width 0.8s;border-radius:2px;"></div>
+          </div>
+        </div>
+
+        <div style="background:rgba(245,166,35,0.05);border:1px solid rgba(245,166,35,0.1);border-radius:8px;padding:12px;">
+          <div style="font-size:8px;color:#4a6580;letter-spacing:1px;text-transform:uppercase;">Temperature</div>
+          <div id="p-temp-3d" style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#f5a623;">--</div>
+          <div style="font-size:8px;color:#4a6580;">°C  (optimal: 24–28)</div>
+          <div style="height:3px;background:rgba(255,255,255,0.05);border-radius:2px;margin-top:6px;overflow:hidden;">
+            <div id="p-temp-bar" style="height:100%;width:0%;background:#f5a623;transition:width 0.8s;border-radius:2px;"></div>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:12px;">
+          <div style="font-size:8px;color:#4a6580;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Heatmap Legend</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <div style="width:80px;height:8px;border-radius:4px;background:linear-gradient(90deg,#0000ff,#00e5c3,#ffff00,#ff3d5a);"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:8px;color:#4a6580;">
+            <span>Low</span><span>Mid</span><span>High</span>
+          </div>
+        </div>
+
+        <div style="font-size:8px;color:#4a6580;text-align:center;letter-spacing:1px;">
+          Drag to rotate · Scroll to zoom
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Insert before bottom bar
+  const bottomBar = document.querySelector('.bottom-bar');
+  main.insertBefore(section, bottomBar);
+})();
+
+// ══════════════════════════════════════════════
+// THREE.JS 3D POND HEATMAP
+// ══════════════════════════════════════════════
+let currentLayer = 'oxygen';
+let pondTemp = 27, pondPH = 7.2, pondO2 = 7.5, pondWaste = 0.2;
+let time3d = 0;
+
+// Grid resolution
+const GRID_W = 24;
+const GRID_H = 24;
+
+function setLayer(layer) {
+  currentLayer = layer;
+  ['o2','waste','temp'].forEach(l => {
+    const btn = document.getElementById('layer-' + (l==='o2'?'o2':l==='waste'?'waste':'temp'));
+    if (btn) {
+      const active = (l === layer || (layer==='oxygen' && l==='o2'));
+      btn.style.background = active ? 'rgba(0,229,195,0.15)' : 'rgba(255,255,255,0.04)';
+      btn.style.borderColor = active ? '#00e5c3' : '#4a6580';
+      btn.style.color = active ? '#00e5c3' : '#4a6580';
+    }
+  });
+  updateHeatmap();
+}
+
+function valueToColor(v, min, max, scheme) {
+  const t = Math.max(0, Math.min(1, (v - min) / (max - min)));
+  let r, g, b;
+  if (scheme === 'cool_warm') {
+    // Blue → Cyan → Green → Yellow → Red
+    if      (t < 0.25) { r=0;            g=t*4;        b=1; }
+    else if (t < 0.5)  { r=0;            g=1;          b=1-(t-0.25)*4; }
+    else if (t < 0.75) { r=(t-0.5)*4;    g=1;          b=0; }
+    else               { r=1;            g=1-(t-0.75)*4; b=0; }
+  } else if (scheme === 'danger') {
+    // Green → Yellow → Red
+    if (t < 0.5) { r=t*2; g=1; b=0; }
+    else         { r=1; g=1-(t-0.5)*2; b=0; }
+  }
+  return new THREE.Color(r, g, b);
+}
+
+function getGridValue(ix, iy, layer) {
+  const nx = ix / (GRID_W-1);
+  const ny = iy / (GRID_H-1);
+
+  // Simulate realistic pond distribution
+  // O2: higher at edges (aeration), lower center
+  // Waste: higher center-bottom (fish congregate)
+  // Temp: gradient from one corner (sun exposure)
+
+  const noise1 = Math.sin(nx*Math.PI*2 + time3d*0.5) * Math.cos(ny*Math.PI*1.5 + time3d*0.3);
+  const noise2 = Math.sin(nx*Math.PI*3 - time3d*0.4) * Math.sin(ny*Math.PI*2 + time3d*0.6);
+
+  if (layer === 'oxygen') {
+    const edge = Math.min(nx, 1-nx, ny, 1-ny) * 4; // high at edges
+    const base = pondO2;
+    return base + edge * 1.5 + noise1 * 0.4 + noise2 * 0.2;
+  } else if (layer === 'waste') {
+    const center = 1 - Math.sqrt((nx-0.5)**2 + (ny-0.5)**2) * 2;
+    const base = pondWaste;
+    return base + center * 0.3 + noise1 * 0.08 + noise2 * 0.05;
+  } else {
+    // temp: gradient + noise
+    const gradient = nx * 2 + ny * 1;
+    return pondTemp - 2 + gradient * 0.8 + noise1 * 0.5 + noise2 * 0.3;
+  }
+}
+
+// ── Setup Three.js ──
+const canvas3d = document.getElementById('pond-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas: canvas3d, antialias: true, alpha: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setClearColor(0x000000, 0);
+
+const scene  = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 2, 0.1, 1000);
+camera.position.set(18, 22, 28);
+camera.lookAt(0, 0, 0);
+
+// Lighting
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const dirLight = new THREE.DirectionalLight(0x00e5c3, 0.8);
+dirLight.position.set(10, 20, 10);
+scene.add(dirLight);
+
+// Build grid geometry
+const geometry = new THREE.PlaneGeometry(20, 20, GRID_W-1, GRID_H-1);
+geometry.rotateX(-Math.PI / 2);
+const material = new THREE.MeshPhongMaterial({
+  vertexColors: true,
+  side: THREE.DoubleSide,
+  shininess: 40,
+  transparent: true,
+  opacity: 0.92,
+});
+const mesh = new THREE.Mesh(geometry, material);
+scene.add(mesh);
+
+// Wireframe overlay
+const wireMat = new THREE.MeshBasicMaterial({ color: 0x00e5c3, wireframe: true, transparent: true, opacity: 0.06 });
+const wireMesh = new THREE.Mesh(geometry.clone(), wireMat);
+scene.add(wireMesh);
+
+// Pond border
+const borderGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(20, 0.1, 20));
+const borderMat = new THREE.LineBasicMaterial({ color: 0x00e5c3, transparent: true, opacity: 0.4 });
+scene.add(new THREE.LineSegments(borderGeo, borderMat));
+
+// Fish particles
+const fishGeo = new THREE.BufferGeometry();
+const fishCount = 30;
+const fishPos = new Float32Array(fishCount * 3);
+for (let i = 0; i < fishCount; i++) {
+  fishPos[i*3]   = (Math.random()-0.5)*18;
+  fishPos[i*3+1] = Math.random()*0.5;
+  fishPos[i*3+2] = (Math.random()-0.5)*18;
+}
+fishGeo.setAttribute('position', new THREE.BufferAttribute(fishPos, 3));
+const fishMat  = new THREE.PointsMaterial({ color: 0xffffff, size: 0.35, transparent: true, opacity: 0.8 });
+const fishPts  = new THREE.Points(fishGeo, fishMat);
+scene.add(fishPts);
+
+// Axis labels (simple)
+function makeLabel(text, pos) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128; canvas.height = 32;
+  const ctx = canvas.getContext('2d');
+  ctx.font = '14px Space Mono';
+  ctx.fillStyle = '#4a6580';
+  ctx.fillText(text, 4, 22);
+  const tex = new THREE.CanvasTexture(canvas);
+  const sp  = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+  sp.position.set(...pos);
+  sp.scale.set(3, 0.8, 1);
+  scene.add(sp);
+}
+makeLabel('North', [0, 0.5, -11]);
+makeLabel('South', [0, 0.5,  11]);
+makeLabel('East',  [11, 0.5,  0]);
+makeLabel('West',  [-11, 0.5, 0]);
+
+// ── Mouse orbit ──
+let isDragging = false, prevMX = 0, prevMY = 0;
+let theta = 0.6, phi = 0.8, radius = 38;
+canvas3d.addEventListener('mousedown', e => { isDragging=true; prevMX=e.clientX; prevMY=e.clientY; });
+canvas3d.addEventListener('mouseup',   () => isDragging=false);
+canvas3d.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  theta -= (e.clientX-prevMX)*0.008;
+  phi    = Math.max(0.2, Math.min(1.4, phi - (e.clientY-prevMY)*0.008));
+  prevMX=e.clientX; prevMY=e.clientY;
+  camera.position.set(radius*Math.sin(theta)*Math.sin(phi), radius*Math.cos(phi), radius*Math.cos(theta)*Math.sin(phi));
+  camera.lookAt(0,0,0);
+});
+canvas3d.addEventListener('wheel', e => {
+  radius = Math.max(15, Math.min(60, radius + e.deltaY*0.05));
+  camera.position.set(radius*Math.sin(theta)*Math.sin(phi), radius*Math.cos(phi), radius*Math.cos(theta)*Math.sin(phi));
+  camera.lookAt(0,0,0);
+});
+
+function updateHeatmap() {
+  const pos    = geometry.attributes.position;
+  const colors = [];
+  const scheme = currentLayer === 'waste' ? 'danger' : 'cool_warm';
+  const ranges = {
+    oxygen: [4, 12],
+    waste:  [0, 1.5],
+    temp:   [20, 35],
+  };
+  const layer = currentLayer === 'oxygen' ? 'oxygen' : currentLayer;
+  const [mn, mx] = ranges[layer];
+
+  for (let iy = 0; iy < GRID_H; iy++) {
+    for (let ix = 0; ix < GRID_W; ix++) {
+      const val = getGridValue(ix, iy, layer);
+      const col = valueToColor(val, mn, mx, scheme);
+      colors.push(col.r, col.g, col.b);
+
+      // Height displacement based on value
+      const vi = iy * GRID_W + ix;
+      const height = ((val - mn) / (mx - mn)) * 2.5;
+      pos.setY(vi, height);
+    }
+  }
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  geometry.attributes.position.needsUpdate = true;
+  geometry.attributes.color.needsUpdate    = true;
+  geometry.computeVertexNormals();
+  wireMesh.geometry.attributes.position.array.set(pos.array);
+  wireMesh.geometry.attributes.position.needsUpdate = true;
+}
+
+// Resize handler
+function resizePond() {
+  const w = canvas3d.clientWidth;
+  const h = canvas3d.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resizePond).observe(canvas3d);
+resizePond();
+
+// ── Animate fish particles ──
+function animateFishParticles() {
+  const pos = fishPts.geometry.attributes.position;
+  for (let i = 0; i < fishCount; i++) {
+    pos.array[i*3]   += (Math.random()-0.5)*0.08;
+    pos.array[i*3+2] += (Math.random()-0.5)*0.08;
+    pos.array[i*3]    = Math.max(-9, Math.min(9, pos.array[i*3]));
+    pos.array[i*3+2]  = Math.max(-9, Math.min(9, pos.array[i*3+2]));
+  }
+  pos.needsUpdate = true;
+}
+
+// ── Main render loop ──
+function animate3d() {
+  requestAnimationFrame(animate3d);
+  time3d += 0.012;
+  updateHeatmap();
+  animateFishParticles();
+  renderer.render(scene, camera);
+}
+animate3d();
+
+// ── Update pond params from ANFIS sensor data ──
+async function updatePond3D() {
+  try {
+    const res = await fetch('http://127.0.0.1:5050/sensor_data');
+    const d   = await res.json();
+    if (d.temp > 0) {
+      pondTemp  = d.temp;
+      pondPH    = d.ph;
+      // Derive O2 and waste from temp + pH (biological model)
+      // O2 drops as temp rises (Henry's law)
+      pondO2    = 14.6 - 0.38 * pondTemp + 0.006 * pondTemp**2;
+      pondO2    = Math.max(2, Math.min(12, pondO2 + (pondPH - 7) * 0.3));
+      // Waste rises with higher temp (faster metabolism)
+      pondWaste = 0.05 + (pondTemp - 20) * 0.02 + (pondPH < 7 ? (7-pondPH)*0.1 : 0);
+      pondWaste = Math.max(0.01, Math.min(2.0, pondWaste));
+
+      // Update sidebar
+      document.getElementById('p-o2').textContent       = pondO2.toFixed(1);
+      document.getElementById('p-waste').textContent    = pondWaste.toFixed(2);
+      document.getElementById('p-temp-3d').textContent  = pondTemp.toFixed(1);
+      document.getElementById('p-o2-bar').style.width   = (pondO2/12*100)+'%';
+      document.getElementById('p-waste-bar').style.width= (pondWaste/2*100)+'%';
+      document.getElementById('p-temp-bar').style.width = ((pondTemp-15)/25*100)+'%';
+
+      // Color code O2
+      const o2c = pondO2 >= 6 ? '#00e5c3' : pondO2 >= 4 ? '#ffb020' : '#ff3d5a';
+      document.getElementById('p-o2').style.color = o2c;
+      const wc  = pondWaste < 0.5 ? '#00e5c3' : pondWaste < 1.0 ? '#ffb020' : '#ff3d5a';
+      document.getElementById('p-waste').style.color = wc;
+    }
+  } catch(e) {}
+}
+setInterval(updatePond3D, 1500);
+updatePond3D();
+</script>
